@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  resources :recipes
+
   get "page/index"
   root "page#index"
   get "/about" => 'page#about'
