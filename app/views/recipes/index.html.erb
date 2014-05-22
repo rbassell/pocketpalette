@@ -1,10 +1,21 @@
-<h1>Listing recipes</h1>
+<h1>Recipes A-Z</h1>
+<h3>How to Post Recipes</h3>
+<ol>
+  <li> Go to http://fb.liox.eu/ and enter in your recipe</li>
+  <li> It should follow this format upon entering:</li>
+    <li><p><img src="http://img8.uploadhouse.com/fileuploads/19443/1944389830b68c5118c8424863b547c627ba559d.png" alt="Responsive image"></p></li>
+  <li> Once you've submited the link to the free hosting service, go to the New Recipes page add your recipe title and link in the description!</li>
+</ol>
 
-<table>
+
+
+<table class= "table table-striped">
   <thead>
     <tr>
-      <th>Description</th>
-      <th colspan="3"></th>
+      <th>Recipes</th>
+      <th> </th>
+      <th></th>
+      <th></th>
     </tr>
   </thead>
 
@@ -12,14 +23,22 @@
     <% @recipes.each do |recipe| %>
       <tr>
         <td><%= recipe.description %></td>
+        <td><%= recipe.user.try( :email ) %></td>
+        <td><%= time_ago_in_words recipe.created_at %></td>
+         <% if current_user == recipe.user %>
         <td><%= link_to 'Show', recipe %></td>
         <td><%= link_to 'Edit', edit_recipe_path(recipe) %></td>
         <td><%= link_to 'Destroy', recipe, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+        <% else %>
+        <td></td><td></td><td></td>
+        <% end %>
       </tr>
     <% end %>
   </tbody>
 </table>
 
 <br>
+<% if user_signed_in? %>
+<%= link_to 'New Recipe', new_recipe_path, class: "btn btn - primary btn -lg"%>
+<% end %>
 
-<%= link_to 'New Recipe', new_recipe_path %>

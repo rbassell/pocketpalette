@@ -1,14 +1,12 @@
 class RecipesController < ApplicationController
   before_action :set_recipe, only: [:show, :edit, :update, :destroy]
+   before_action :authenticate_user!, only: [:new, :edit, :update, :destroy]
+  before_action :correct_user, only: [:edit, :update, :destroy]
 
   # GET /recipes
   # GET /recipes.json
   def index
     @recipes = Recipe.all.order(:description)
-
-    if params[:category]
-      @recipes = Recipe.where( :category => params[:category] ).order( :description )
-    end
   end
 
   # GET /recipes/1
@@ -18,7 +16,7 @@ class RecipesController < ApplicationController
 
   # GET /recipes/new
   def new
-    @recipe = Recipe.new
+     @recipe = current_user.recipes.build
   end
 
   # GET /recipes/1/edit
@@ -28,14 +26,14 @@ class RecipesController < ApplicationController
   # POST /recipes
   # POST /recipes.json
   def create
-    @recipe = Recipe.new(recipe_params)
+    @recipe = current_user.recipes.build(recipe_params)
 
     respond_to do |format|
       if @recipe.save
         format.html { redirect_to @recipe, notice: 'Recipe was successfully created.' }
-        format.json { render :show, status: :created, location: @recipe }
+        format.json { render action: 'show', status: :created, location: @recipe }
       else
-        format.html { render :new }
+        format.html { render action: 'new' }
         format.json { render json: @recipe.errors, status: :unprocessable_entity }
       end
     end
@@ -47,9 +45,9 @@ class RecipesController < ApplicationController
     respond_to do |format|
       if @recipe.update(recipe_params)
         format.html { redirect_to @recipe, notice: 'Recipe was successfully updated.' }
-        format.json { render :show, status: :ok, location: @recipe }
+        format.json { head :no_content }
       else
-        format.html { render :edit }
+        format.html { render action: 'edit'}
         format.json { render json: @recipe.errors, status: :unprocessable_entity }
       end
     end
@@ -58,9 +56,9 @@ class RecipesController < ApplicationController
   # DELETE /recipes/1
   # DELETE /recipes/1.json
   def destroy
-    @recipe.destroy
+    @recipe.delete
     respond_to do |format|
-      format.html { redirect_to recipes_url, notice: 'Recipe was successfully destroyed.' }
+      format.html { redirect_to recipes_url, notice: 'Recipe has been deleted.' }
       format.json { head :no_content }
     end
   end
@@ -69,6 +67,11 @@ class RecipesController < ApplicationController
     # Use callbacks to share common setup or constraints between actions.
     def set_recipe
       @recipe = Recipe.find(params[:id])
+    end
+
+    def correct_user
+      @recipe= current_user.recipes.find_by(id: params[:id])
+      redirect_to recipes_path, notice: "Not authorized to edit this recipe" if @recipe.nil?
     end
 
     # Never trust parameters from the scary internet, only allow the white list through.
